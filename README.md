@@ -1,174 +1,113 @@
-# Gestion Étudiante — Module 1 (ENSTA Brest / Institut Polytechnique de Paris)
+# Gestion Étudiante — TP Module 1
 
-TP fil-rouge **Ingénierie Logicielle — Module 1** implémenté en **Python** et en **Java**, avec une démarche **TDD stricte** (RED → GREEN → REFACTOR) et application des principes **SOLID** du Module 2.
+TP du module Ingénierie Logicielle (ENSTA Brest, 2A).
+Implémenté en Python et en Java, avec une démarche TDD.
 
-> **Périmètre** : les trois TP enchaînés — Héritage, Encapsulation, Polymorphisme — sur le même fil rouge `Personne / Etudiant / Enseignant / Cours`.
-
----
-
-## 📁 Structure du dépôt
-
-```
-gestion-etudiante/
-├── README.md
-├── .gitignore
-├── docs/
-│   └── uml.md                       # Diagramme UML PlantUML
-├── python/
-│   ├── cours.py
-│   ├── personne.py
-│   ├── etudiant.py
-│   ├── enseignant.py
-│   ├── main.py                      # Démo TP1
-│   ├── main_tp2.py                  # Démo TP2
-│   ├── main_tp3.py                  # Démo TP3
-│   ├── test_heritage.py             # 14 tests
-│   ├── test_encapsulation.py        # 17 tests
-│   ├── test_polymorphisme.py        # 7 tests
-│   └── requirements.txt
-└── java/
-    ├── pom.xml
-    └── src/
-        ├── main/java/com/ensta/gestion/
-        │   ├── Cours.java
-        │   ├── Personne.java
-        │   ├── Etudiant.java
-        │   ├── Enseignant.java
-        │   ├── Main.java
-        │   ├── MainTp2.java
-        │   └── MainTp3.java
-        └── test/java/com/ensta/gestion/
-            ├── TestHeritage.java
-            ├── TestEncapsulation.java
-            └── TestPolymorphisme.java
-```
+Le fil rouge des trois TP : un mini-système de gestion d'école avec
+des étudiants, des enseignants et des cours.
 
 ---
 
-## 🚀 Lancement rapide
+## Ce qu'il y a dans ce repo
+
+- `python/` : le code Python + les tests pytest
+- `java/` : le code Java + les tests JUnit 5 (projet Maven)
+- `docs/uml.md` : le diagramme de classes (PlantUML)
+
+Les trois TP sont enchaînés sur les mêmes classes :
+- TP1 ajoute l'héritage (Etudiant hérite de Personne)
+- TP2 sécurise les attributs (validation dans les setters)
+- TP3 ajoute le polymorphisme (Enseignant + afficherDetails redéfinie)
+
+---
+
+## Comment lancer
 
 ### Python
 
-```bash
-cd python
-python -m venv .venv && source .venv/bin/activate   # Windows : .venv\Scripts\activate
-pip install -r requirements.txt
+    cd python
+    pip install -r requirements.txt
 
-# Exécuter les démos
-python main.py        # TP1 — Héritage
-python main_tp2.py    # TP2 — Encapsulation
-python main_tp3.py    # TP3 — Polymorphisme
+    python main.py        # TP1
+    python main_tp2.py    # TP2
+    python main_tp3.py    # TP3
 
-# Tous les tests (38 tests)
-pytest -v
-
-# Par TP
-pytest test_heritage.py -v
-pytest test_encapsulation.py -v
-pytest test_polymorphisme.py -v
-
-# Couverture
-pytest --cov=. --cov-report=html
-```
+    pytest -v             # 38 tests
 
 ### Java
 
-```bash
-cd java
-
-# Tous les tests
-mvn test
-
-# Par TP
-mvn test -Dtest=TestHeritage
-mvn test -Dtest=TestEncapsulation
-mvn test -Dtest=TestPolymorphisme
-
-# Exécuter les démos
-mvn compile exec:java -Dexec.mainClass=com.ensta.gestion.Main
-mvn compile exec:java -Dexec.mainClass=com.ensta.gestion.MainTp2
-mvn compile exec:java -Dexec.mainClass=com.ensta.gestion.MainTp3
-
-# Alternative sans Maven (javac + java)
-mkdir -p target/classes
-javac -d target/classes src/main/java/com/ensta/gestion/*.java
-java -cp target/classes com.ensta.gestion.Main
-```
+    cd java
+    mvn test
+    mvn compile exec:java -Dexec.mainClass=com.ensta.gestion.Main
+    mvn compile exec:java -Dexec.mainClass=com.ensta.gestion.MainTp2
+    mvn compile exec:java -Dexec.mainClass=com.ensta.gestion.MainTp3
 
 ---
 
-## 🧭 Les trois TP
+## Ce qu'on a fait dans chaque TP
 
-### TP1 — Héritage (Réutilisation)
+### TP1 — Héritage
 
-Trois classes qui reflètent la relation **« est-un »** :
+Trois classes :
+- Personne (nom, âge)
+- Etudiant qui hérite de Personne et ajoute un numéro, une moyenne, une liste de cours
+- Cours (nom du cours, professeur)
 
-- `Cours` : nom du cours + professeur responsable.
-- `Personne` (mère) : nom, âge.
-- `Etudiant` (fille) hérite de `Personne` et ajoute : numéro étudiant, moyenne, liste de cours.
+L'idée c'est de ne pas dupliquer le code : un Etudiant est une Personne,
+donc il récupère automatiquement nom et âge.
 
-Points clés :
-- `super().__init__(...)` / `super(...)` obligatoire en première instruction du constructeur enfant.
-- `isinstance(etudiant, Personne)` / `assertInstanceOf(Personne.class, etudiant)` vérifient le lien d'héritage.
-- `__str__` / `toString()` complets avec délégation au parent via `super()`.
+### TP2 — Encapsulation
 
-### TP2 — Encapsulation (Sécurité)
+Tous les attributs deviennent privés. On passe par des getters/setters
+qui valident :
+- l'âge doit être entre 0 et 100
+- la moyenne entre 0 et 20
+- le nom ne peut pas être vide
+- le numéro étudiant ne peut plus être modifié après création
 
-Tous les attributs deviennent **privés** et sont accessibles uniquement via getters/setters validés :
+Si on essaie de mettre une valeur invalide, ça lève une exception
+(ValueError en Python, IllegalArgumentException en Java).
 
-| Règle métier                               | Exception levée                         |
-| ------------------------------------------ | --------------------------------------- |
-| `age` ∈ [0, 100]                           | `ValueError` / `IllegalArgumentException` |
-| `moyenne` ∈ [0.0, 20.0]                    | idem                                    |
-| `nom` non vide, non blanc, non nul         | idem                                    |
-| `numero_etudiant` **lecture seule** après création | pas de setter exposé             |
-| `liste_cours` accessible via `ajouter_cours()` uniquement (copie défensive) | — |
+### TP3 — Polymorphisme
 
-Preuve : les tests du TP1 restent 100 % verts après l'ajout de l'encapsulation.
+On ajoute la classe Enseignant (matière + salaire), qui hérite aussi
+de Personne. La méthode afficherDetails() est définie dans Personne
+puis redéfinie dans chaque fille.
 
-### TP3 — Polymorphisme (Flexibilité)
-
-- `afficher_details()` / `afficherDetails()` est définie dans `Personne` et **redéfinie (override)** dans `Etudiant` et `Enseignant`.
-- `Enseignant` ajoute `matiere` et `salaire` (avec validation).
-- Le `main_tp3` parcourt une `list[Personne]` / `List<Personne>` **hétérogène** et appelle la même méthode sur chaque élément — la liaison dynamique dispatche automatiquement.
-- **Aucun `isinstance` / `instanceof` dans la boucle** — c'est la garantie LSP + OCP.
-
----
-
-## ✅ Application des principes SOLID (Module 2)
-
-| Principe | Application dans ce TP |
-| -------- | ---------------------- |
-| **S — Single Responsibility** | Chaque classe a une seule responsabilité : `Cours` = données d'un cours ; `Personne` = identité ; `Etudiant` = identité académique ; `Enseignant` = identité enseignante. Aucune classe ne fait à la fois logique + persistance + affichage. |
-| **O — Open / Closed** | Ajouter un nouveau type de personne (`Doctorant`, `PersonnelAdministratif`…) se fait via une nouvelle classe qui hérite de `Personne` et redéfinit `afficher_details()`. Zéro modification du code existant, zéro `if/elif` sur le type. |
-| **L — Liskov Substitution** | `Etudiant` et `Enseignant` sont strictement substituables à `Personne` : `afficher_details()` retourne toujours une `str`/`String` non vide et **ne lève jamais d'exception**. La fonction `afficher_anonyme(p: Personne)` fonctionne pour tout sous-type (test dédié). |
-| **I — Interface Segregation** | Pas d'interface monolithique forcée. Si on voulait découpler, on introduirait `IAffichable` (contenant juste `afficher_details`) sans polluer les classes de données. |
-| **D — Dependency Inversion** | La conception est préparée : la classe `Etudiant` ne dépend pas d'une source de données concrète. Pour TP suivants (SOLID Module 2), on injectera un `IRepo` via constructeur sans toucher à la logique métier. |
+Du coup on peut mettre des Etudiants et des Enseignants dans la même
+liste typée List<Personne>, et appeler afficherDetails() sur chacun :
+le bon affichage est choisi automatiquement selon le type réel.
+Pas besoin de isinstance ou instanceof.
 
 ---
 
-## 🧪 Cycle TDD appliqué
+## Pourquoi c'est SOLID
 
-Pour chaque TP :
+- S : chaque classe fait une seule chose (Cours = données d'un cours,
+  Personne = identité, etc). Pas de classe qui fait à la fois logique +
+  affichage + base de données.
+- O : si demain on ajoute un type Doctorant, on crée juste une nouvelle
+  classe qui hérite de Personne. Aucun code existant à toucher.
+- L : Etudiant et Enseignant peuvent remplacer Personne partout sans
+  rien casser (afficherDetails ne lève jamais d'exception).
+- I et D : pas vraiment exploités ici (pas d'interface, pas de base
+  de données), mais l'archi est prête pour ça.
 
-1. **RED** — on écrit d'abord les tests (`test_*.py` / `TestX.java`). Ils échouent car les classes / méthodes n'existent pas encore.
-2. **GREEN** — on écrit le code minimal pour faire passer les tests.
-3. **REFACTOR** — on nettoie, on factorise (passage par setters dans constructeurs, copie défensive, constantes `AGE_MIN`/`MOYENNE_MAX`, etc.) sans casser les tests.
+---
 
-Résultat : **38 tests Python** et **30 tests Java** (3 fichiers × TP × nested classes). Tous verts.
+## Le cycle TDD
+
+Pour chaque fonctionnalité on a fait :
+1. Rouge : écrire le test d'abord, il échoue (la classe ou méthode n'existe pas encore)
+2. Vert : écrire juste assez de code pour faire passer le test
+3. Refactor : nettoyer sans rien casser
+
+Au final : 38 tests Python + 30 tests Java, tous verts.
 
 ---
 
-## 📊 Diagramme UML
+## Stack
 
-Voir [`docs/uml.md`](docs/uml.md).
-
-```
-          Personne
-          /       \
-    Etudiant   Enseignant
-
-    Etudiant *── Cours  (composition : un étudiant possède 0..* cours)
-```
-
----
+- Python 3.10+ avec pytest
+- Java 17 avec Maven et JUnit 5
+- Git pour le versioning (3 commits, un par TP)
