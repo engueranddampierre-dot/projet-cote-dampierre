@@ -3,17 +3,38 @@
 TP1 : héritage (super().__init__) + ajoute numero_etudiant, moyenne, liste_cours.
 TP2 : encapsulation moyenne + numero_etudiant en lecture seule + liste_cours protégée.
 TP3 : afficher_details() override polymorphe.
+TP4 : Pattern Observer — Etudiant est le *Sujet Observable*.
+      Quand la moyenne est modifiée, tous les observateurs enregistrés sont notifiés.
 
 SRP : Etudiant représente l'identité académique d'un étudiant.
 LSP : substituable à Personne — afficher_details() retourne une str, ne lève rien.
+OCP : le mécanisme d'observation est ouvert à l'extension (n'importe quel Observer
+      peut s'abonner) sans modifier la classe.
 """
 
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
 from typing import List
 
 from cours import Cours
 from personne import Personne
 
 
+# ---------------------------------------------------------------------------
+# Pattern OBSERVER — interface Observer (DIP : dépendance vers l'abstraction)
+# ---------------------------------------------------------------------------
+class Observer(ABC):
+    """Interface observateur : reçoit les mises à jour d'un Etudiant."""
+
+    @abstractmethod
+    def mise_a_jour(self, etudiant: "Etudiant") -> None:
+        """Appelée automatiquement quand la moyenne d'un étudiant change."""
+
+
+# ---------------------------------------------------------------------------
+# Classe Etudiant (Sujet Observable)
+# ---------------------------------------------------------------------------
 class Etudiant(Personne):
     """Un étudiant : une Personne avec un numéro, une moyenne et des cours."""
 
@@ -30,18 +51,31 @@ class Etudiant(Personne):
         super().__init__(nom, age)
         if not numero_etudiant or not str(numero_etudiant).strip():
             raise ValueError("Le numéro d'étudiant ne peut pas être vide.")
-        # numero_etudiant : lecture seule après création (pas de setter exposé)
         self.__numero_etudiant = str(numero_etudiant).strip()
         self.__liste_cours: List[Cours] = []
-        # passage par le setter pour validation
+        self.__observers: List[Observer] = []
+        # passage par le setter pour validation (ne notifie pas encore car
+        # _notifier vérifie que des observers existent)
         self.moyenne = moyenne
+
+    # ----- Observer : abonnement / désabonnement -----
+    def ajouter_observer(self, obs: Observer) -> None:
+        if obs not in self.__observers:
+            self.__observers.append(obs)
+
+    def retirer_observer(self, obs: Observer) -> None:
+        self.__observers.remove(obs)
+
+    def _notifier(self) -> None:
+        for obs in self.__observers:
+            obs.mise_a_jour(self)
 
     # ----- numero_etudiant : lecture seule -----
     @property
     def numero_etudiant(self) -> str:
         return self.__numero_etudiant
 
-    # ----- moyenne : encapsulée + validée -----
+    # ----- moyenne : encapsulée + validée + notification -----
     @property
     def moyenne(self) -> float:
         return self.__moyenne
@@ -56,12 +90,12 @@ class Etudiant(Personne):
                 f"{self.MOYENNE_MAX} (reçu : {valeur})."
             )
         self.__moyenne = float(valeur)
+        # Notification automatique des observateurs (Pattern Observer)
+        self._notifier()
 
     # ----- liste_cours : accès contrôlé -----
     @property
     def liste_cours(self) -> List[Cours]:
-        # On retourne une copie défensive : impossible de modifier la liste interne
-        # depuis l'extérieur. Encapsulation respectée.
         return list(self.__liste_cours)
 
     def ajouter_cours(self, cours: Cours) -> None:
