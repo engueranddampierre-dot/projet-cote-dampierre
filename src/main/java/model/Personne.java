@@ -1,6 +1,7 @@
-package main.model;
+package model;
 
-public class Personne {
+
+public abstract class Personne {
     private String nom;
     private int age;
 
@@ -13,17 +14,16 @@ public class Personne {
     public int getAge() { return age; }
 
     public void setNom(String nom) {
-        if (nom == null || nom.isEmpty())
-            throw new IllegalArgumentException("Le nom ne peut pas être vide");
+        if (nom == null || nom.isEmpty()) throw new IllegalArgumentException("Nom invalide");
         this.nom = nom;
     }
 
     public void setAge(int age) {
-        if (age < 0 || age > 100)
-            throw new IllegalArgumentException("Age invalide");
+        if (age < 0 || age > 100) throw new IllegalArgumentException("Age invalide");
         this.age = age;
     }
+
     public String afficherDetails() {
-    return "Nom : " + nom + " | Age : " + age;
-}
+        return "Nom : " + nom + " | Age : " + age;
+    }
 }

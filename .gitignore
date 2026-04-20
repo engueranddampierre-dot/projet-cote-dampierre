@@ -1,39 +1,4 @@
-# ===== Python =====
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-env/
-.pytest_cache/
-.coverage
-htmlcov/
-*.egg-info/
-.mypy_cache/
-.ruff_cache/
-
-# ===== Java / Maven =====
 target/
 *.class
-*.jar
-*.war
-.mvn/
-!.mvn/wrapper/maven-wrapper.jar
-dependency-reduced-pom.xml
-
-# ===== IDE =====
-.idea/
-*.iml
 .vscode/
-.project
-.classpath
-.settings/
-nbproject/
-nbactions*.xml
-.nb-gradle/
-
-# ===== OS =====
-.DS_Store
-Thumbs.db
-*.swp
-*~
+.idea/
