@@ -1,6 +1,6 @@
-import main.model.Personne;
-import main.model.Etudiant;
-import main.model.Enseignant;
+import model.Personne;
+import model.Etudiant;
+import model.Enseignant;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
