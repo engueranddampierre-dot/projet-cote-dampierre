@@ -1,4 +1,5 @@
-package main.model;
+package model;
+
 
 public class Enseignant extends Personne {
     private double salaire;
